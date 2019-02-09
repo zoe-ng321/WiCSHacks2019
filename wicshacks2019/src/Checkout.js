@@ -13,10 +13,12 @@ import Typography from '@material-ui/core/Typography';
 import AddressForm from './AddressForm';
 import PaymentForm from './PaymentForm';
 import Review from './Review';
+import Budget from './Budget';
+import TaxBreakdown from './TaxBreakdown';
 
 const styles = theme => ({
   appBar: {
-    position: 'relative',
+    position: 'fixed',
   },
   layout: {
     width: 'auto',
@@ -51,26 +53,20 @@ const styles = theme => ({
   },
 });
 
-const steps = ['Shipping address', 'Payment details', 'Review your order'];
-
-function getStepContent(step) {
-  switch (step) {
-    case 0:
-      return <AddressForm />;
-    case 1:
-      return <PaymentForm />;
-    case 2:
-      return <Review />;
-    default:
-      throw new Error('Unknown step');
-  }
-}
+const steps = ['Taxes', 'Employer Information', 'Tax Breakdown', 'Budget', "Review"];
 
 class Checkout extends React.Component {
-  state = {
-    activeStep: 0,
-  };
+  constructor(props) {
+    super(props);
+      this.state = {
+        activeStep: 0,
+        tax:"",
+        taxSal:0
+      };
+      this.getData=this.getData.bind(this);
+      this.getData2=this.getData2.bind(this);
 
+  }
   handleNext = () => {
     this.setState(state => ({
       activeStep: state.activeStep + 1,
@@ -89,6 +85,18 @@ class Checkout extends React.Component {
     });
   };
 
+  getData(val){
+    // do not forget to bind getData in constructor
+    this.setState({
+      taxSal:val
+    })
+  }
+  getData2(val){
+    // do not forget to bind getData in constructor
+    this.setState({
+      tax:val
+    })
+  }
   render() {
     const { classes } = this.props;
     const { activeStep } = this.state;
@@ -99,14 +107,16 @@ class Checkout extends React.Component {
         <AppBar position="absolute" color="default" className={classes.appBar}>
           <Toolbar>
             <Typography variant="h6" color="inherit" noWrap>
-              Company name
+              Adulting
             </Typography>
           </Toolbar>
         </AppBar>
         <main className={classes.layout}>
           <Paper className={classes.paper}>
             <Typography component="h1" variant="h4" align="center">
-              Checkout
+              Enter your info
+              {this.state.tax}
+              {this.state.taxSal}
             </Typography>
             <Stepper activeStep={activeStep} className={classes.stepper}>
               {steps.map(label => (
@@ -119,30 +129,36 @@ class Checkout extends React.Component {
               {activeStep === steps.length ? (
                 <React.Fragment>
                   <Typography variant="h5" gutterBottom>
-                    Thank you for your order.
+                    Here is the result
                   </Typography>
                   <Typography variant="subtitle1">
-                    Your order number is #2001539. We have emailed your order confirmation, and will
-                    send you an update when your order has shipped.
+
                   </Typography>
                 </React.Fragment>
               ) : (
                 <React.Fragment>
-                  {getStepContent(activeStep)}
+                {activeStep === 0 && <AddressForm sendData={this.getData} sendData2={this.getData2}/>}
+                {activeStep === 1 && <PaymentForm />}
+                {activeStep === 2 && <Review />}
+                {activeStep === 3 && <TaxBreakdown/>}
+                {activeStep === 4 && <Budget/>}
                   <div className={classes.buttons}>
                     {activeStep !== 0 && (
                       <Button onClick={this.handleBack} className={classes.button}>
                         Back
                       </Button>
                     )}
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={this.handleNext}
-                      className={classes.button}
-                    >
-                      {activeStep === steps.length - 1 ? 'Place order' : 'Next'}
-                    </Button>
+
+                    {activeStep !== steps.length - 1 && (
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={this.handleNext}
+                        className={classes.button}
+                      >
+                         Next
+                      </Button>
+                    )}
                   </div>
                 </React.Fragment>
               )}
